@@ -33,11 +33,8 @@ def check_existion(file):
     file_dir, file_name = os.path.split(file)
     date = file_name[:6]
     while os.path.exists(file):
-        retype = input(file+'已经存在，是否覆盖? (y/n/c, default=N) ')
-        print(retype)
-        if retype == 'Y' or retype == 'y' or retype == 'yes' or retype == 'Yes' or retype == 'YES':
-            os.remove(file)
-        elif retype == 'c' or retype == "C":
+        retype = input(file+'已经存在，是否重新输入主题? (y/n, default=y) ')
+        if retype == 'n' or retype == 'no' or retype == 'No' or retype == 'N':
             sys.exit(0)
         else:
             new_theme = input("新主题: ")
