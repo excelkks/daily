@@ -14,6 +14,11 @@ def open_file(file):
     os. system(open_cmd)
 
 
+def open_directory(path):
+    open_cmd = 'open '+ path
+    os.system(open_cmd)
+
+
 def get_date():
     today = time.localtime()
     date = '{:0>2d}月{:0>2d}日'.format(today.tm_mon, today.tm_mday)
@@ -75,6 +80,7 @@ if __name__ == '__main__':
     parser.add_argument('-T', '--theme', help="修改主题", action="store_true")
     parser.add_argument('--date', help="指定日期", type=str)
     parser.add_argument('--directory', help="存放的目录", type=str)
+    parser.add_argument('-O', '--open', help="打开目录", action="store_true")
     args = parser.parse_args()
 
     if args.directory:
@@ -84,7 +90,10 @@ if __name__ == '__main__':
         daily = os.path.join(curr_dir, 'dailes')
     if not os.path.exists(daily):
         os.mkdir(daily)
-
+    
+    if args.open:
+        open_directory(daily)
+        sys.exit(0)
 
     today = get_date()
     if args.date:
