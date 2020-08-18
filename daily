@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+
+import os
+import time
+import shutil
+import re
+import sys 
+import argparse
+
+
+# open markdown file method.
+def open_file(file):
+    open_cmd = 'open -a Typora ' + file
+    os. system(open_cmd)
+
+
+def get_date():
+    today = time.localtime()
+    date = '{:0>2d}月{:0>2d}日'.format(today.tm_mon, today.tm_mday)
+    return date
+
+
+def get_daily_file(date, path):
+    all_daily = [daily_file for daily_file in os.listdir(path)
+            if daily_file.endswith('.md') and len(daily_file) > 8]
+    for daily_file in all_daily:
+        if daily_file.startswith(date):
+            return daily_file
+    return ''
+
+
+def check_existion(file):
+    file_dir, file_name = os.path.split(file)
+    date = file_name[:6]
+    while os.path.exists(file):
+        retype = input(file+'已经存在，是否覆盖? (y/n/c, default=N) ')
+        print(retype)
+        if retype == 'Y' or retype == 'y' or retype == 'yes' or retype == 'Yes' or retype == 'YES':
+            os.remove(file)
+        elif retype == 'c' or retype == "C":
+            sys.exit(0)
+        else:
+            new_theme = input("新主题: ")
+            if new_theme == '':
+                file = os.path.join(file_dir, date+'.md')
+            else:
+                file = os.path.join(file_dir, date+'_'+new_theme+'.md')
+    return file
+
+
+def new_daily_file(date, path):
+    theme = input("主题: ")
+    if theme == '':
+        file = os.path.join(path, date+'.md')
+    else:
+        file = os.path.join(path, date+'_'+theme+'.md')
+    file = check_existion(file)
+    fp = open(file, 'w', encoding='utf-8')
+    fp.close()
+    return file
+    
+
+def change_theme(file):
+    file_dir,file_name = os.path.split(file)
+    date = file_name[:6]
+    new_theme = input("新主题: ")
+    if new_theme == '':
+        new_file = os.path.join(file_dir, date+'.md')
+    else:
+        new_file = os.path.join(file_dir, date+'_'+new_theme+'.md')
+    new_file = check_existion(new_file)
+    shutil.move(file, new_file)
+    return new_file
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-T', '--theme', help="修改主题", action="store_true")
+    parser.add_argument('--date', help="指定日期", type=str)
+    parser.add_argument('--directory', help="存放的目录", type=str)
+    args = parser.parse_args()
+
+    if args.directory:
+        daily = args.directory 
+    else:
+        curr_dir = sys.path[0]
+        daily = os.path.join(curr_dir, 'dailes')
+    if not os.path.exists(daily):
+        os.mkdir(daily)
+
+
+    today = get_date()
+    if args.date:
+        re_date = r'(\d{1,2})[\./-](\d{1,2})'
+        m_date = re.match(re_date, args.date)
+        if m_date:
+            today = m_date.group(1)+'月'+m_date.group(2)+'日'
+    daily_path = os.path.expanduser(daily) 
+    today_daily = get_daily_file(today, daily_path)
+
+    if today_daily:
+        if args.theme is True:
+            today_daily = change_theme(os.path.join(daily_path, today_daily))
+            sys.exit(0)
+    else:
+        today_daily = new_daily_file(today, daily_path)
+    open_file(os.path.join(daily_path, today_daily))
